@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -60,9 +60,10 @@ namespace PollyErrorHandling
             Console.WriteLine("10 retries");
             try
             {
+                var timeoutPolicy = Policy.TimeoutAsync(10);// overwrite default of HttpClient
                 var t = Policy.Handle<ApplicationException>()
                     .WaitAndRetryAsync(10, i => TimeSpan.FromSeconds(i))
-                    .ExecuteAsync(async () => await SimulateWork());
+                    .ExecuteAsync(() => timeoutPolicy.ExecuteAsync(async () => await SimulateWork()));
                 t.Wait();
             }
             catch (Exception e)
